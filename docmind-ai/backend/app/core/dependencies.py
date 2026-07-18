@@ -1,0 +1,64 @@
+"""
+FastAPI dependency providers.
+
+This is the single place where request-scoped resources are wired up and
+injected into endpoints via `Depends(...)`. Keeping DI centralized here
+(rather than constructing sessions/services inline in endpoint functions)
+is what makes it possible to override dependencies in tests (e.g. swap
+`get_db` for a session pointed at a test database) without touching
+endpoint code.
+"""
+from collections.abc import Generator
+
+from fastapi import Depends
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.orm import Session
+
+from app.core.exceptions import ForbiddenException
+from app.db.session import SessionLocal
+from app.models.user import User
+from app.repositories.user_repository import UserRepository
+from app.services.auth_service import AuthService
+
+# `auto_error=True` makes FastAPI return a 403 with a clear message if the
+# Authorization header is missing entirely, before our code even runs —
+# `get_current_user` below only has to handle a *present but invalid* token.
+_bearer_scheme = HTTPBearer(auto_error=True)
+
+
+def get_db() -> Generator[Session, None, None]:
+    """
+    Yields a database session for the lifetime of a single request, and
+    guarantees it is closed afterward regardless of whether the request
+    succeeded or raised — this is why it's a generator dependency rather
+    than a plain function.
+    """
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
+def get_auth_service(db: Session = Depends(get_db)) -> AuthService:
+    return AuthService(UserRepository(db))
+
+
+def get_current_user(
+    credentials: HTTPAuthorizationCredentials = Depends(_bearer_scheme),
+    auth_service: AuthService = Depends(get_auth_service),
+) -> User:
+    """
+    Decodes the bearer token and loads the corresponding user. Any endpoint
+    that depends on this (directly or via `get_current_active_user`) is
+    automatically a protected endpoint — there's no separate "is this route
+    protected" flag to keep in sync elsewhere.
+    """
+    return auth_service.get_user_from_access_token(credentials.credentials)
+
+
+def get_current_active_user(current_user: User = Depends(get_current_user)) -> User:
+    if not current_user.is_active:
+        raise ForbiddenException("This account has been deactivated")
+    return current_user
+

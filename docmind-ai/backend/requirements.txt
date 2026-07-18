@@ -1,0 +1,24 @@
+# --- Web framework ---
+fastapi
+uvicorn[standard]
+
+# --- Configuration ---
+pydantic
+pydantic-settings
+email-validator
+
+# --- Database ---
+sqlalchemy
+alembic
+psycopg[binary]
+
+# --- Security (declared now for Milestone 2; unused but installed so the
+# environment doesn't need to change again mid-project) ---
+python-jose[cryptography]
+passlib[bcrypt]==1.7.4
+# passlib 1.7.4's bcrypt backend-detection calls internals bcrypt removed in
+# 4.1+, causing a spurious "password cannot be longer than 72 bytes" error
+# on every hash call regardless of password length. Pinned to the last
+# version known to work with passlib until passlib ships a fix.
+bcrypt==4.0.1
+python-multipart

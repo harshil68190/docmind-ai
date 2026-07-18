@@ -1,0 +1,26 @@
+import { createBrowserRouter, Navigate } from "react-router-dom";
+import { AppLayout } from "@/components/layout/AppLayout";
+import { ProtectedRoute } from "@/components/layout/ProtectedRoute";
+import { LoginPage } from "@/routes/auth/LoginPage";
+import { RegisterPage } from "@/routes/auth/RegisterPage";
+import { DashboardPage } from "@/routes/dashboard/DashboardPage";
+import { DocumentsPage } from "@/routes/documents/DocumentsPage";
+
+export const router = createBrowserRouter([
+  { path: "/login", element: <LoginPage /> },
+  { path: "/register", element: <RegisterPage /> },
+  {
+    element: <ProtectedRoute />,
+    children: [
+      {
+        element: <AppLayout />,
+        children: [
+          { path: "/dashboard", element: <DashboardPage /> },
+          { path: "/documents", element: <DocumentsPage /> },
+        ],
+      },
+    ],
+  },
+  { path: "/", element: <Navigate to="/dashboard" replace /> },
+  { path: "*", element: <Navigate to="/dashboard" replace /> },
+]);
