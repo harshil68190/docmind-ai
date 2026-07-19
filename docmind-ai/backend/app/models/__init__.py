@@ -6,3 +6,4 @@ autogenerate discovery. A model that exists but is never imported anywhere
 is invisible to Alembic even though it inherits from `Base`.
 """
 from app.models.user import User  # noqa: F401
+from app.models.document import Document  # noqa: F401

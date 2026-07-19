@@ -36,3 +36,15 @@ class ForbiddenException(DocMindException):
 
 class ValidationException(DocMindException):
     """Raised when input fails a business-rule validation check."""
+
+
+class UnsupportedFileTypeException(DocMindException):
+    """Raised when an uploaded file's extension is not one DocMind supports."""
+
+
+class FileTooLargeException(DocMindException):
+    """Raised when an uploaded file exceeds the configured size limit."""
+
+
+class ExtractionFailedException(DocMindException):
+    """Raised when text extraction from an otherwise-valid file fails."""

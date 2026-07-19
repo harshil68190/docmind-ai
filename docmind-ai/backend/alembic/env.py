@@ -23,7 +23,7 @@ from app.db.base import Base
 # Importing the models package registers every model against
 # `Base.metadata`; without this import, autogenerate would see an empty
 # schema even though the models exist in code.
-from app.models import user  # noqa: F401
+from app.models import user, document  # noqa: F401
 
 config = context.config
 config.set_main_option("sqlalchemy.url", settings.DATABASE_URL)

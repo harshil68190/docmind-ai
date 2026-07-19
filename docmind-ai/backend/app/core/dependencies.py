@@ -17,8 +17,13 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import ForbiddenException
 from app.db.session import SessionLocal
 from app.models.user import User
+from app.repositories.document_repository import DocumentRepository
 from app.repositories.user_repository import UserRepository
 from app.services.auth_service import AuthService
+from app.services.document_service import DocumentService
+from app.services.ingestion.extractor_service import ExtractionService
+from app.storage.base_storage import BaseStorageService
+from app.storage.local_storage import LocalStorageService
 
 # `auto_error=True` makes FastAPI return a 403 with a clear message if the
 # Authorization header is missing entirely, before our code even runs —
@@ -61,4 +66,20 @@ def get_current_active_user(current_user: User = Depends(get_current_user)) -> U
     if not current_user.is_active:
         raise ForbiddenException("This account has been deactivated")
     return current_user
+
+
+def get_storage_service() -> BaseStorageService:
+    return LocalStorageService()
+
+
+def get_extraction_service() -> ExtractionService:
+    return ExtractionService()
+
+
+def get_document_service(
+    db: Session = Depends(get_db),
+    storage_service: BaseStorageService = Depends(get_storage_service),
+    extraction_service: ExtractionService = Depends(get_extraction_service),
+) -> DocumentService:
+    return DocumentService(DocumentRepository(db), storage_service, extraction_service)
 

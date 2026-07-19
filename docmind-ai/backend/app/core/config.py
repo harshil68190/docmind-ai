@@ -42,6 +42,14 @@ class Settings(BaseSettings):
     POSTGRES_PORT: int = Field(default=5432)
     POSTGRES_DB: str
 
+    # --- File storage ---
+    UPLOAD_DIR: str = Field(default="storage/uploads")
+    MAX_UPLOAD_SIZE_MB: int = Field(default=20)
+
+    @property
+    def max_upload_size_bytes(self) -> int:
+        return self.MAX_UPLOAD_SIZE_MB * 1024 * 1024
+
     # --- CORS ---
     # Stored as the raw env string (not List[str]) deliberately:
     # pydantic-settings attempts to JSON-decode any List[...]-typed field

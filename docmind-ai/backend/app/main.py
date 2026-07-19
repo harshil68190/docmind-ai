@@ -16,9 +16,12 @@ from app.core.config import settings
 from app.core.exceptions import (
     AlreadyExistsException,
     DocMindException,
+    ExtractionFailedException,
+    FileTooLargeException,
     ForbiddenException,
     NotFoundException,
     UnauthorizedException,
+    UnsupportedFileTypeException,
     ValidationException,
 )
 from app.core.logging import configure_logging, get_logger
@@ -34,6 +37,9 @@ _EXCEPTION_STATUS_MAP: dict[type[DocMindException], int] = {
     UnauthorizedException: status.HTTP_401_UNAUTHORIZED,
     ForbiddenException: status.HTTP_403_FORBIDDEN,
     ValidationException: status.HTTP_422_UNPROCESSABLE_ENTITY,
+    UnsupportedFileTypeException: status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+    FileTooLargeException: status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
+    ExtractionFailedException: status.HTTP_422_UNPROCESSABLE_ENTITY,
 }
 
 

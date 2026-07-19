@@ -4,8 +4,8 @@ A production-architected Retrieval-Augmented Generation (RAG) platform for
 document-grounded conversational AI, with citation tracking, semantic
 search, and multi-format document ingestion.
 
-> **Status:** Milestone 2 — Authentication & User Management. Document
-> upload and RAG are not implemented yet.
+> **Status:** Milestone 3 — Document Upload & Ingestion. Embeddings, FAISS,
+> chunking, and RAG chat are not implemented yet.
 
 Full architecture — folder structure, DB schema, API design, RAG pipeline,
 sequence diagrams — is in [`DocMind_AI_Architecture.md`](./DocMind_AI_Architecture.md).
@@ -170,11 +170,47 @@ copy `access_token` from the response, click **Authorize**, paste the token
 (no `Bearer ` prefix needed — the UI adds it), then any protected endpoint
 in the docs will use it automatically.
 
+## Documents (Milestone 3)
+
+Upload, storage, and text extraction — no chunking or embeddings yet.
+See `backend/app/services/document_service.py` for the orchestration and
+`backend/app/services/ingestion/extractor_service.py` for extraction.
+
+**Endpoints** (`/api/v1/documents/*`, all require auth): `POST /upload`,
+`GET /` (list), `GET /{id}`, `GET /{id}/download`, `DELETE /{id}`.
+
+```bash
+TOKEN="<paste an access_token from /auth/login>"
+
+# Upload
+curl -X POST http://localhost:8000/api/v1/documents/upload \
+  -H "Authorization: Bearer $TOKEN" \
+  -F "file=@/path/to/report.pdf"
+
+# List
+curl http://localhost:8000/api/v1/documents -H "Authorization: Bearer $TOKEN"
+
+# Download
+curl -OJ http://localhost:8000/api/v1/documents/<id>/download -H "Authorization: Bearer $TOKEN"
+
+# Delete
+curl -X DELETE http://localhost:8000/api/v1/documents/<id> -H "Authorization: Bearer $TOKEN"
+```
+
+Files are stored on disk at `backend/storage/uploads/{user_id}/{document_id}/`,
+gitignored by design (see root `.gitignore`) — never commit uploaded content.
+
+**Note on page structure:** the milestone spec's "Dashboard page" requirements
+(upload, drag-and-drop, table, status badges) were implemented on the existing
+`/documents` route rather than `/dashboard`, since Milestone 1 already
+reserved `/dashboard` for the usage-statistics page specced for Milestone 6.
+Document management living at `/documents` keeps that split intact.
+
 ## Roadmap
 
 1. ✅ **Milestone 1** — Project foundation
 2. ✅ **Milestone 2** — Authentication (JWT, register/login)
-3. Milestone 3 — Document upload, extraction, chunking
+3. ✅ **Milestone 3** — Document upload, extraction, storage
 4. Milestone 4 — Embeddings + FAISS + retrieval
 5. Milestone 5 — Full RAG chat pipeline with streaming + citations
 6. Milestone 6 — Dashboard, usage stats, search
