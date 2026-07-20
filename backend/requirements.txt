@@ -22,8 +22,11 @@ passlib[bcrypt]==1.7.4
 # version known to work with passlib until passlib ships a fix.
 bcrypt==4.0.1
 python-multipart
-
-# --- Document ingestion (Milestone 3) ---
 PyMuPDF
 python-docx
 python-pptx
+langchain-text-splitters
+langchain-core
+sentence-transformers
+faiss-cpu
+langchain-groq

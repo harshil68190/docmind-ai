@@ -13,3 +13,7 @@ __pycache__/
 # OS
 .DS_Store
 Thumbs.db
+
+# Runtime storage
+backend/storage/uploads/
+backend/storage/vectorstore/

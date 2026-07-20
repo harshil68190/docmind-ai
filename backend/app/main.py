@@ -19,6 +19,7 @@ from app.core.exceptions import (
     ExtractionFailedException,
     FileTooLargeException,
     ForbiddenException,
+    GenerationFailedException,
     NotFoundException,
     UnauthorizedException,
     UnsupportedFileTypeException,
@@ -40,6 +41,7 @@ _EXCEPTION_STATUS_MAP: dict[type[DocMindException], int] = {
     UnsupportedFileTypeException: status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
     FileTooLargeException: status.HTTP_413_REQUEST_ENTITY_TOO_LARGE,
     ExtractionFailedException: status.HTTP_422_UNPROCESSABLE_ENTITY,
+    GenerationFailedException: status.HTTP_502_BAD_GATEWAY,
 }
 
 

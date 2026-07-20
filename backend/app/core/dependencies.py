@@ -17,6 +17,9 @@ from sqlalchemy.orm import Session
 from app.core.exceptions import ForbiddenException
 from app.db.session import SessionLocal
 from app.models.user import User
+from app.rag.embedding import EmbeddingService
+from app.rag.generator import GeneratorService
+from app.rag.pipeline import RAGPipeline
 from app.repositories.document_repository import DocumentRepository
 from app.repositories.user_repository import UserRepository
 from app.services.auth_service import AuthService
@@ -76,10 +79,26 @@ def get_extraction_service() -> ExtractionService:
     return ExtractionService()
 
 
+def get_embedding_service() -> EmbeddingService:
+    return EmbeddingService()
+
+
+def get_generator_service() -> GeneratorService:
+    return GeneratorService()
+
+
+def get_rag_pipeline(
+    embedding_service: EmbeddingService = Depends(get_embedding_service),
+    generator_service: GeneratorService = Depends(get_generator_service),
+) -> RAGPipeline:
+    return RAGPipeline(embedding_service, generator_service)
+
+
 def get_document_service(
     db: Session = Depends(get_db),
     storage_service: BaseStorageService = Depends(get_storage_service),
     extraction_service: ExtractionService = Depends(get_extraction_service),
+    rag_pipeline: RAGPipeline = Depends(get_rag_pipeline),
 ) -> DocumentService:
-    return DocumentService(DocumentRepository(db), storage_service, extraction_service)
+    return DocumentService(DocumentRepository(db), storage_service, extraction_service, rag_pipeline)
 

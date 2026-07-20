@@ -48,3 +48,7 @@ class FileTooLargeException(DocMindException):
 
 class ExtractionFailedException(DocMindException):
     """Raised when text extraction from an otherwise-valid file fails."""
+
+
+class GenerationFailedException(DocMindException):
+    """Raised when the LLM provider fails to generate an answer."""

@@ -4,8 +4,9 @@ A production-architected Retrieval-Augmented Generation (RAG) platform for
 document-grounded conversational AI, with citation tracking, semantic
 search, and multi-format document ingestion.
 
-> **Status:** Milestone 3 — Document Upload & Ingestion. Embeddings, FAISS,
-> chunking, and RAG chat are not implemented yet.
+> **Status:** Milestone 4 — RAG Pipeline (LangChain + Gemini + FAISS).
+> Multi-turn conversation history, dashboard stats, and additional AI
+> features (summary/FAQs/compare) are not implemented yet.
 
 Full architecture — folder structure, DB schema, API design, RAG pipeline,
 sequence diagrams — is in [`DocMind_AI_Architecture.md`](./DocMind_AI_Architecture.md).
@@ -206,13 +207,51 @@ gitignored by design (see root `.gitignore`) — never commit uploaded content.
 reserved `/dashboard` for the usage-statistics page specced for Milestone 6.
 Document management living at `/documents` keeps that split intact.
 
+## RAG Pipeline & Chat (Milestone 4)
+
+Upload → Extraction → Chunking (`RecursiveCharacterTextSplitter`, 800/100) →
+Embeddings (`all-MiniLM-L6-v2`) → FAISS (per-user index) → Retrieval (top 5) →
+Gemini → Citation-aware answer. See `backend/app/rag/pipeline.py` for the
+composition root and `backend/app/rag/` for every individual stage.
+
+**Endpoint**: `POST /api/v1/chat` (requires auth).
+
+```bash
+TOKEN="<paste an access_token from /auth/login>"
+
+curl -X POST http://localhost:8000/api/v1/chat \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What does this document say about revenue?"}'
+
+# {
+#   "answer": "Revenue grew 20% in Q3, according to the report.",
+#   "citations": [{"file": "report.pdf", "page": 3}]
+# }
+```
+
+If nothing relevant is found (or you haven't uploaded anything yet), you'll get:
+```json
+{"answer": "I couldn't find that information in the uploaded documents.", "citations": []}
+```
+
+**Required setup**: set `GOOGLE_API_KEY` in `.env` (get one at
+https://aistudio.google.com/apikey). Without it, `/chat` returns a clean
+`502` rather than a bare server error — everything else in the app works
+fine without it configured.
+
+**Security note**: each user's document chunks live in a physically
+separate FAISS index (`storage/vectorstore/{user_id}.faiss`), not a shared
+index with a filter — cross-user retrieval leakage is structurally
+impossible, not just filtered out.
+
 ## Roadmap
 
 1. ✅ **Milestone 1** — Project foundation
 2. ✅ **Milestone 2** — Authentication (JWT, register/login)
 3. ✅ **Milestone 3** — Document upload, extraction, storage
-4. Milestone 4 — Embeddings + FAISS + retrieval
-5. Milestone 5 — Full RAG chat pipeline with streaming + citations
+4. ✅ **Milestone 4** — RAG pipeline (LangChain + Gemini + FAISS) + chat
+5. Milestone 5 — Multi-turn conversation history, streaming responses
 6. Milestone 6 — Dashboard, usage stats, search
 7. Milestone 7 — Summary / FAQs / compare / explain
 8. Milestone 8 — Polish + deployment hardening

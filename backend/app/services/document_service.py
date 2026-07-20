@@ -1,16 +1,18 @@
 """
 Document service.
 
-Orchestrates `DocumentRepository` (DB), `BaseStorageService` (disk), and
-`ExtractionService` (text) to implement the upload/list/get/delete use
-cases. This is the only place that decides *what* those three lower layers
-do together — none of them know about each other.
+Orchestrates `DocumentRepository` (DB), `BaseStorageService` (disk),
+`ExtractionService` (text), and, as of Milestone 4, `RAGPipeline` (chunk /
+embed / index) to implement the upload/list/get/delete use cases. This is
+the only place that decides *what* those layers do together — none of
+them know about each other.
 """
 import uuid
 
 from app.core.config import settings
 from app.core.exceptions import NotFoundException
 from app.models.document import Document, DocumentStatus
+from app.rag.pipeline import RAGPipeline
 from app.repositories.document_repository import DocumentRepository
 from app.services.ingestion.extractor_service import ExtractionService
 from app.storage.base_storage import BaseStorageService
@@ -24,10 +26,12 @@ class DocumentService:
         document_repository: DocumentRepository,
         storage_service: BaseStorageService,
         extraction_service: ExtractionService,
+        rag_pipeline: RAGPipeline,
     ) -> None:
         self.document_repository = document_repository
         self.storage_service = storage_service
         self.extraction_service = extraction_service
+        self.rag_pipeline = rag_pipeline
 
     def upload_document(
         self, *, user_id: uuid.UUID, original_filename: str, content: bytes
@@ -66,25 +70,46 @@ class DocumentService:
 
     def _extract_and_finalize(self, document: Document) -> Document:
         try:
-            extracted_text = self.extraction_service.extract(
+            pages = self.extraction_service.extract(
                 document.storage_path, document.file_extension
             )
+            # Pages are joined back into one flat string for the
+            # extracted.txt artifact (used for preview/download-adjacent
+            # purposes) and for `text_length`. Page boundaries aren't lost
+            # by this join -- `pages` (still page-tagged) is what actually
+            # gets passed to the RAG pipeline below.
+            full_text = "\n\n".join(page.text for page in pages)
             self.storage_service.save(
                 user_id=document.user_id,
                 document_id=document.id,
                 filename="extracted.txt",
-                content=extracted_text.encode("utf-8"),
+                content=full_text.encode("utf-8"),
             )
+
+            # Chunk, embed, and index into this user's FAISS store. A
+            # document is only marked READY once it's actually searchable
+            # -- if indexing fails here, the document should show as
+            # FAILED just like an extraction failure would, since "READY"
+            # is meant to mean "usable in RAG chat", not merely "text was
+            # extracted".
+            self.rag_pipeline.ingest_document(
+                user_id=document.user_id,
+                document_id=document.id,
+                filename=document.original_filename,
+                pages=pages,
+            )
+
             return self.document_repository.update(
                 document,
-                text_length=len(extracted_text),
+                text_length=len(full_text),
                 status=DocumentStatus.READY,
             )
         except Exception:
-            # The upload itself succeeded — only extraction failed. We keep
-            # the document row (status=FAILED) rather than deleting it, so
-            # the user sees *why* it's unusable (in the UI's status badge)
-            # instead of the upload silently disappearing.
+            # The upload itself succeeded — only extraction or indexing
+            # failed. We keep the document row (status=FAILED) rather than
+            # deleting it, so the user sees *why* it's unusable (in the
+            # UI's status badge) instead of the upload silently
+            # disappearing.
             return self.document_repository.update(document, status=DocumentStatus.FAILED)
 
     def list_documents(self, *, user_id: uuid.UUID) -> list[Document]:
@@ -102,6 +127,7 @@ class DocumentService:
 
     def delete_document(self, *, user_id: uuid.UUID, document_id: uuid.UUID) -> None:
         document = self._get_owned_document(user_id, document_id)
+        self.rag_pipeline.remove_document(user_id=user_id, document_id=document.id)
         self.storage_service.delete_document_folder(user_id=user_id, document_id=document.id)
         self.document_repository.delete(document)
 

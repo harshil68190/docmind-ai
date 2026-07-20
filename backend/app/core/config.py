@@ -50,6 +50,13 @@ class Settings(BaseSettings):
     def max_upload_size_bytes(self) -> int:
         return self.MAX_UPLOAD_SIZE_MB * 1024 * 1024
 
+    # --- Vector store (Milestone 4) ---
+    VECTOR_STORE_DIR: str = Field(default="storage/vectorstore")
+
+        # --- Groq ---
+    GROQ_API_KEY: str = Field(default="")
+    GROQ_MODEL_NAME: str = Field(default="llama-3.3-70b-versatile")
+
     # --- CORS ---
     # Stored as the raw env string (not List[str]) deliberately:
     # pydantic-settings attempts to JSON-decode any List[...]-typed field
