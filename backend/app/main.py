@@ -96,18 +96,15 @@ def _register_exception_handlers(app: FastAPI) -> None:
     async def unhandled_exception_handler(
         request: Request, exc: Exception
     ) -> JSONResponse:
-        traceback.print_exc()          # <-- THIS IS IMPORTANT
-        print(exc)
-
+        logger.exception("Unhandled exception on path=%s", request.url.path)
         return JSONResponse(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             content={
-                "detail": str(exc),
-                "error_type": type(exc).__name__,
+                "detail": "Internal server error",
+                "error_type": "InternalError",
             },
         )
-
-
+    
 def _register_routers(app: FastAPI) -> None:
     app.include_router(api_router, prefix=settings.API_V1_PREFIX)
 
