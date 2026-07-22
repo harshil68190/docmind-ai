@@ -53,16 +53,14 @@ def upload_document(
     )
 
 
-@router.get(
-    "",
-    response_model=list[DocumentResponse],
-    summary="List the current user's documents",
-)
+@router.get("")
 def list_documents(
     current_user: User = Depends(get_current_active_user),
-    document_service: DocumentService = Depends(get_document_service),
-) -> list[Document]:
-    return document_service.list_documents(user_id=current_user.id)
+):
+    return {
+        "ok": True,
+        "user_id": str(current_user.id)
+    }
 
 
 @router.get(
