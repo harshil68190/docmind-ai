@@ -1,7 +1,7 @@
 """
-Gemini response generation via langchain-google-genai.
+Groq response generation via langchain-google-genai.
 
-This is the only module in the codebase that talks to Gemini directly --
+This is the only module in the codebase that talks to Groq directly --
 if the LLM provider ever changes, this file (plus the two settings in
 `core/config.py`) is everything that needs to change; `pipeline.py` and
 everything upstream of it only know about "generate an answer from these

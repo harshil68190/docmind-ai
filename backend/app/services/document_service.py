@@ -8,7 +8,7 @@ the only place that decides *what* those layers do together — none of
 them know about each other.
 """
 import uuid
-
+import traceback
 from app.core.config import settings
 from app.core.exceptions import NotFoundException
 from app.models.document import Document, DocumentStatus
@@ -18,7 +18,8 @@ from app.services.ingestion.extractor_service import ExtractionService
 from app.storage.base_storage import BaseStorageService
 from app.utils.file_validator import resolve_mime_type, validate_extension, validate_size
 from app.utils.filenames import generate_safe_filename
-
+import logging
+logger = logging.getLogger(__name__)
 
 class DocumentService:
     def __init__(
@@ -104,13 +105,14 @@ class DocumentService:
                 text_length=len(full_text),
                 status=DocumentStatus.READY,
             )
+        
         except Exception:
-            # The upload itself succeeded — only extraction or indexing
-            # failed. We keep the document row (status=FAILED) rather than
-            # deleting it, so the user sees *why* it's unusable (in the
-            # UI's status badge) instead of the upload silently
-            # disappearing.
-            return self.document_repository.update(document, status=DocumentStatus.FAILED)
+            logger.exception("Document processing failed")
+
+            return self.document_repository.update(
+                document,
+                status=DocumentStatus.FAILED,
+            )
 
     def list_documents(self, *, user_id: uuid.UUID) -> list[Document]:
         return self.document_repository.list_for_user(user_id)

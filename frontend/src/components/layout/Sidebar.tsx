@@ -1,11 +1,12 @@
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, FileText } from "lucide-react";
+import { LayoutDashboard, FileText, MessageSquare } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 // Chat/Insights nav items are added once their routes exist (Milestone 5+).
 const NAV_ITEMS = [
   { to: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/documents", label: "Documents", icon: FileText },
+  { to: "/chat", label: "Chat", icon: MessageSquare },
 ] as const;
 
 export function Sidebar() {
