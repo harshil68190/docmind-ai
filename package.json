@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "globals": "^17.7.0",
+    "typescript-eslint": "^8.65.0"
+  }
+}

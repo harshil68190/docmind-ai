@@ -1,6 +1,7 @@
-import { Download, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { StatusBadge } from "@/components/documents/StatusBadge";
+import { useState } from "react";
+import { DocumentCard } from "@/components/documents/DocumentCard";
+import { DocumentIntelligenceModal } from "@/components/documents/DocumentIntelligenceModal";
+import { EmptyDocumentsState } from "@/components/documents/EmptyDocumentsState";
 import type { DocumentDto } from "@/types/document";
 
 interface DocumentTableProps {
@@ -8,78 +9,56 @@ interface DocumentTableProps {
   onDelete: (id: string) => void;
   onDownload: (id: string, filename: string) => void;
   deletingId?: string | null;
+  onUploadTrigger?: () => void;
 }
 
-function formatFileSize(bytes: number): string {
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
+export function DocumentTable({
+  documents,
+  onDelete,
+  onDownload,
+  deletingId,
+  onUploadTrigger,
+}: DocumentTableProps) {
+  const [selectedDoc, setSelectedDoc] = useState<DocumentDto | null>(null);
 
-function formatDate(iso: string): string {
-  return new Date(iso).toLocaleDateString(undefined, {
-    year: "numeric",
-    month: "short",
-    day: "numeric",
-  });
-}
-
-export function DocumentTable({ documents, onDelete, onDownload, deletingId }: DocumentTableProps) {
   if (documents.length === 0) {
     return (
-      <div className="mt-6 rounded-lg border border-dashed border-border py-16 text-center text-sm text-muted-foreground">
-        No documents yet — upload one above to get started.
+      <div className="mt-8">
+        <EmptyDocumentsState onUploadClick={() => onUploadTrigger?.()} />
       </div>
     );
   }
 
   return (
-    <div className="mt-6 overflow-hidden rounded-lg border border-border">
-      <table className="w-full text-sm">
-        <thead className="bg-secondary/50 text-left text-xs uppercase tracking-wide text-muted-foreground">
-          <tr>
-            <th className="px-4 py-3 font-medium">Name</th>
-            <th className="px-4 py-3 font-medium">Status</th>
-            <th className="px-4 py-3 font-medium">Size</th>
-            <th className="px-4 py-3 font-medium">Uploaded</th>
-            <th className="px-4 py-3 font-medium text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border">
+    <>
+      <div className="mt-8">
+        <div className="flex items-center justify-between mb-4">
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            Your Documents ({documents.length})
+          </p>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {documents.map((doc) => (
-            <tr key={doc.id}>
-              <td className="max-w-xs truncate px-4 py-3 font-medium">{doc.original_filename}</td>
-              <td className="px-4 py-3">
-                <StatusBadge status={doc.status} />
-              </td>
-              <td className="px-4 py-3 text-muted-foreground">{formatFileSize(doc.file_size)}</td>
-              <td className="px-4 py-3 text-muted-foreground">{formatDate(doc.created_at)}</td>
-              <td className="px-4 py-3">
-                <div className="flex justify-end gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-label={`Download ${doc.original_filename}`}
-                    disabled={doc.status !== "READY"}
-                    onClick={() => onDownload(doc.id, doc.original_filename)}
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    aria-label={`Delete ${doc.original_filename}`}
-                    disabled={deletingId === doc.id}
-                    onClick={() => onDelete(doc.id)}
-                  >
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
-                </div>
-              </td>
-            </tr>
+            <DocumentCard
+              key={doc.id}
+              document={doc}
+              onOpenIntelligence={(d) => setSelectedDoc(d)}
+              onDownload={onDownload}
+              onDelete={onDelete}
+              isDeleting={deletingId === doc.id}
+            />
           ))}
-        </tbody>
-      </table>
-    </div>
+        </div>
+      </div>
+
+      <DocumentIntelligenceModal
+        document={selectedDoc}
+        onClose={() => setSelectedDoc(null)}
+        onDownload={onDownload}
+        onDelete={onDelete}
+      />
+    </>
   );
 }
+

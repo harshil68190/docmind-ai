@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link } from "react-router-dom";
+import { BrainCircuit } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,75 +19,100 @@ export function RegisterPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm rounded-lg border border-border bg-card p-8 shadow-sm">
-        <h1 className="text-xl font-semibold tracking-tight">Create your account</h1>
-        <p className="mt-1 text-sm text-muted-foreground">Get started with DocMind AI.</p>
+    <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12 select-none animate-fade-in">
+      <div className="w-full max-w-md space-y-6">
+        {/* Brand Header */}
+        <div className="text-center">
+          <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-md shadow-primary/25">
+            <BrainCircuit className="h-6 w-6" />
+          </div>
+          <h1 className="mt-4 text-2xl font-bold tracking-tight text-foreground">
+            DocMind <span className="text-primary">AI</span>
+          </h1>
+          <p className="text-xs font-semibold text-muted-foreground uppercase tracking-widest mt-1">
+            Enterprise Knowledge Platform
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground/80">
+            AI-powered document intelligence for organizations.
+          </p>
+        </div>
 
-        <form className="mt-6 space-y-4" onSubmit={handleSubmit}>
-          <div className="space-y-1.5">
-            <Label htmlFor="fullName">Full name</Label>
-            <Input
-              id="fullName"
-              autoComplete="name"
-              required
-              value={fullName}
-              onChange={(event) => setFullName(event.target.value)}
-              placeholder="Jane Doe"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              autoComplete="email"
-              required
-              value={email}
-              onChange={(event) => setEmail(event.target.value)}
-              placeholder="you@company.com"
-            />
-          </div>
-          <div className="space-y-1.5">
-            <Label htmlFor="password">Password</Label>
-            <Input
-              id="password"
-              type="password"
-              autoComplete="new-password"
-              required
-              minLength={8}
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
-              placeholder="At least 8 characters"
-            />
-            <p className="text-xs text-muted-foreground">
-              Must include an uppercase letter, a lowercase letter, and a number.
-            </p>
+        {/* Card Form */}
+        <div className="rounded-xl border border-border/80 bg-card p-8 shadow-sm">
+          <div className="mb-6">
+            <h2 className="text-lg font-semibold text-foreground">Create your enterprise account</h2>
+            <p className="text-xs text-muted-foreground">Register your organization credentials.</p>
           </div>
 
-          {register.isError && (
-            <p role="alert" className="text-sm text-destructive">
-              {getApiErrorMessage(register.error)}
-            </p>
-          )}
-          {register.isSuccess && (
-            <p className="text-sm text-emerald-600">
-              Account created. Redirecting to sign in…
-            </p>
-          )}
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div className="space-y-1.5">
+              <Label htmlFor="fullName" className="text-xs font-medium">Full Name</Label>
+              <Input
+                id="fullName"
+                autoComplete="name"
+                required
+                value={fullName}
+                onChange={(event) => setFullName(event.target.value)}
+                placeholder="Jane Doe"
+                className="h-10 text-sm"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-xs font-medium">Work Email</Label>
+              <Input
+                id="email"
+                type="email"
+                autoComplete="email"
+                required
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                placeholder="you@company.com"
+                className="h-10 text-sm"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="password" className="text-xs font-medium">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                autoComplete="new-password"
+                required
+                minLength={8}
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                placeholder="At least 8 characters"
+                className="h-10 text-sm"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Must include uppercase, lowercase, and a number.
+              </p>
+            </div>
 
-          <Button type="submit" className="w-full" disabled={register.isPending}>
-            {register.isPending ? "Creating account..." : "Create account"}
-          </Button>
-        </form>
+            {register.isError && (
+              <p role="alert" className="rounded-md bg-destructive/10 p-2.5 text-xs font-medium text-destructive">
+                {getApiErrorMessage(register.error)}
+              </p>
+            )}
+            {register.isSuccess && (
+              <p className="rounded-md bg-emerald-50 p-2.5 text-xs font-medium text-emerald-700">
+                Account created successfully! Redirecting to sign in…
+              </p>
+            )}
 
-        <p className="mt-6 text-sm text-muted-foreground">
-          Already have an account?{" "}
-          <Link to="/login" className="font-medium text-primary hover:underline">
-            Sign in
-          </Link>
-        </p>
+            <Button type="submit" className="w-full h-10 font-medium" disabled={register.isPending}>
+              {register.isPending ? "Creating Account..." : "Register Account"}
+            </Button>
+          </form>
+
+          <div className="mt-6 border-t border-border/60 pt-4 text-center text-xs text-muted-foreground">
+            Already have an enterprise account?{" "}
+            <Link to="/login" className="font-semibold text-primary hover:underline">
+              Sign in
+            </Link>
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+

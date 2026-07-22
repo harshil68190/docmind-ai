@@ -8,15 +8,32 @@ const STATUS_STYLES: Record<DocumentStatus, string> = {
   FAILED: "bg-red-50 text-red-700 border-red-200",
 };
 
+const STATUS_LABELS: Record<DocumentStatus, string> = {
+  UPLOADING: "Uploading",
+  PROCESSING: "Processing",
+  READY: "Ready",
+  FAILED: "Failed",
+};
+
 export function StatusBadge({ status }: { status: DocumentStatus }) {
   return (
     <span
-      className={cn(
-        "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium",
-        STATUS_STYLES[status]
-      )}
+        className={cn(
+            "inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold",
+            STATUS_STYLES[status]
+        )}
     >
-      {status}
+        <span
+            className={cn(
+                "mr-1.5 h-2 w-2 rounded-full",
+                status === "READY" && "bg-emerald-500",
+                status === "PROCESSING" && "bg-amber-500",
+                status === "FAILED" && "bg-red-500",
+                status === "UPLOADING" && "bg-blue-500"
+            )}
+        />
+
+        {STATUS_LABELS[status]}
     </span>
   );
 }
