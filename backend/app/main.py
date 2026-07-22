@@ -90,14 +90,21 @@ def _register_exception_handlers(app: FastAPI) -> None:
             content={"detail": exc.message, "error_type": type(exc).__name__},
         )
 
+    import traceback
+
     @app.exception_handler(Exception)
     async def unhandled_exception_handler(
         request: Request, exc: Exception
     ) -> JSONResponse:
-        logger.exception("Unhandled exception on path=%s", request.url.path)
+        traceback.print_exc()          # <-- THIS IS IMPORTANT
+        print(exc)
+
         return JSONResponse(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            content={"detail": "Internal server error", "error_type": "InternalError"},
+            status_code=500,
+            content={
+                "detail": str(exc),
+                "error_type": type(exc).__name__,
+            },
         )
 
 
