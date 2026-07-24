@@ -78,12 +78,8 @@ class RAGPipeline:
         store = self._vector_store_for_user(user_id)
         store.delete_document(str(document_id))
 
+    
     def answer_question(self, *, user_id: UUID, question: str) -> tuple[str, list[Citation]]:
-        """
-        Answers `question` using only `user_id`'s own documents. Returns
-        `(answer, citations)` -- citations are already empty if the
-        no-context fallback answer was produced (see `citations.py`).
-        """
         store = self._vector_store_for_user(user_id)
         retriever = Retriever(self.embedding_service, store)
         results = retriever.retrieve(question)
