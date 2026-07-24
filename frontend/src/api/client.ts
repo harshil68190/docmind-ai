@@ -7,7 +7,7 @@ import { useAuthStore } from "@/stores/authStore";
  * 401-triggered token refresh are all handled in exactly one place.
  */
 export const apiClient = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8000/api/v1",
+  baseURL: import.meta.env.VITE_API_BASE_URL || "http://localhost:8000/api/v1",
 });
 
 apiClient.interceptors.request.use((config) => {
