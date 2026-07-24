@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useRegister } from "@/hooks/useAuth";
 import { getApiErrorMessage } from "@/lib/errors";
+import { DemoNotice } from "@/components/common/DemoNotice";
 
 export function RegisterPage() {
   const [fullName, setFullName] = useState("");
@@ -13,11 +14,14 @@ export function RegisterPage() {
   const [password, setPassword] = useState("");
   const register = useRegister();
 
+  const errorMessage = register.isError
+    ? getApiErrorMessage(register.error)
+    : "";
+
   function handleSubmit(event: FormEvent) {
     event.preventDefault();
     register.mutate({ fullName, email, password });
   }
-
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12 select-none animate-fade-in">
       <div className="w-full max-w-md space-y-6">
@@ -89,9 +93,16 @@ export function RegisterPage() {
             </div>
 
             {register.isError && (
-              <p role="alert" className="rounded-md bg-destructive/10 p-2.5 text-xs font-medium text-destructive">
-                {getApiErrorMessage(register.error)}
-              </p>
+              <>
+                <p
+                  role="alert"
+                  className="rounded-md bg-destructive/10 p-2.5 text-xs font-medium text-destructive"
+                >
+                  {errorMessage}
+                </p>
+
+                {errorMessage.includes("backend") && <DemoNotice />}
+              </>
             )}
             {register.isSuccess && (
               <p className="rounded-md bg-emerald-50 p-2.5 text-xs font-medium text-emerald-700">
