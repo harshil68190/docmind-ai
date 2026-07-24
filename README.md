@@ -11,7 +11,7 @@ The project demonstrates the implementation of an end-to-end AI application usin
 
 - [Overview](#overview)
 - [Features](#features)
-- [Design Goals](#Design Goals)
+- [Design Goals](#design-goals)
 - [Technology Stack](#technology-stack)
 - [System Architecture](#system-architecture)
 - [Component Responsibilities](#component-responsibilities)
@@ -116,10 +116,16 @@ This project provided practical experience with:
 
 ## System Architecture
 
-DocMind AI follows a modular client-server architecture that separates the user interface, application services, data storage, and AI processing pipeline. This modular design improves maintainability and allows each component to evolve independently.
+DocMind AI follows a modular client-server architecture...
 
 <p align="center">
-  <img src="docs/images/architecture.png" alt="DocMind AI Architecture" width="850">
+  <img src="docs/images/architecture.png"
+       alt="DocMind AI System Architecture"
+       width="900">
+</p>
+
+<p align="center">
+  <em>Figure 1. High-level architecture of the DocMind AI platform.</em>
 </p>
 
 The architecture illustrates how user requests flow through the frontend, backend, database, and Retrieval-Augmented Generation (RAG) pipeline before returning grounded responses with source citations.
