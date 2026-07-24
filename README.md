@@ -119,7 +119,7 @@ This project provided practical experience with:
 DocMind AI follows a modular client-server architecture...
 
 <p align="center">
-  <img src="docs\images\architecture.png"
+  <img src="docs\images\Architecture.png"
        alt="DocMind AI System Architecture"
        width="900">
 </p>
